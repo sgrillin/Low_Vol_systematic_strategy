@@ -710,3 +710,21 @@ def weight_erc(r, cov_estimator=sample_cov, **kwargs):
     """
     est_cov = cov_estimator(r, **kwargs)
     return equal_risk_contributions(est_cov)
+
+
+def factor_rank(f, quantiles, **kwargs):
+    """
+    The function takes two arguments: 
+    1. f = The df that contains the factor for each security that needs to be ranked and forms the basis for the portfolio construction
+    2. quantile = In how many quantiles is the ranked factor going to be split   
+    """ 
+    f_rank = pd.DataFrame(index=f.index, columns=f.columns)
+    
+    for date in f_rank.index:
+        row_values = f.loc[date] # looping values each row
+        ranks = pd.Series(row_values).rank(method='max') # set rank at each row
+        quintiles = pd.qcut(ranks, q=quantiles, labels=False) # divide into quintiles
+
+        # Create dataframe with ranks for each stock at each month(4=high, 0=low)
+        f_rank.loc[date] = quintiles 
+    return f_rank
